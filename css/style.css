@@ -25,7 +25,7 @@
   --hdr-h:  48px;
   --sb:     env(safe-area-inset-bottom, 0px);
   --st:     env(safe-area-inset-top, 0px);
-  --mono:   'JetBrains Mono', monospace;
+  --mono:   'DM Sans', -apple-system, sans-serif;
   --sans:   'DM Sans', -apple-system, sans-serif;
 }
 
@@ -36,6 +36,8 @@ html, body {
   font-family: var(--sans); font-size: 14px;
   -webkit-font-smoothing: antialiased;
   line-height: 1.5;
+  letter-spacing: -0.2px;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ── Loading ─────────────────────────────────────────────────── */
@@ -51,7 +53,7 @@ html, body {
 }
 .loader-label {
   font-family: var(--mono); font-size: 10px;
-  letter-spacing: 5px; color: var(--t2);
+  letter-spacing: 4px; color: var(--t2);
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -426,3 +428,30 @@ html, body {
 .h-right { text-align: right; flex-shrink: 0; }
 .h-total { font-family: var(--mono); font-size: 13px; font-weight: 500; }
 .h-prix { font-family: var(--mono); font-size: 10px; color: var(--t2); margin-top: 2px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   ANNUAL TABLE
+═══════════════════════════════════════════════════════════════ */
+.annual-wrap {
+  margin: 0 16px 16px;
+  background: var(--s1); border: 1px solid var(--b0);
+  border-radius: 9px; overflow: hidden;
+}
+.annual-hdr {
+  display: grid; grid-template-columns: 1.2fr 1fr 1fr;
+  padding: 8px 12px; background: var(--s2);
+  border-bottom: 1px solid var(--b0);
+  font-size: 8px; letter-spacing: 2px; color: var(--t2); text-transform: uppercase;
+}
+.annual-row {
+  display: grid; grid-template-columns: 1.2fr 1fr 1fr;
+  align-items: center; padding: 11px 12px;
+  border-bottom: 1px solid var(--b0);
+}
+.annual-row:last-child { border-bottom: none; }
+.annual-current { background: rgba(237,237,237,.025); }
+.annual-label { font-size: 13px; font-weight: 500; }
+.annual-val { font-size: 13px; font-weight: 500; }
+.annual-delta { text-align: right; }
+.annual-delta-eur { font-size: 13px; font-weight: 500; }
+.annual-delta-pct { font-size: 11px; margin-top: 2px; opacity: .8; }

@@ -456,9 +456,7 @@ function renderEvolution() {
     return;
   }
 
-  const first = log[0], last = log[log.length - 1];
-  const varV   = last.valeurTotale - first.valeurTotale;
-  const varPct = first.valeurTotale > 0 ? varV / first.valeurTotale * 100 : 0;
+  const last   = log[log.length - 1];
   const maxV   = Math.max(...log.map(e => e.valeurTotale));
   const maxPnl = Math.max(...log.map(e => e.pnl));
 
@@ -468,18 +466,6 @@ function renderEvolution() {
     <div class="period-bar">${periodBtns()}</div>
 
     <div class="chart-sec" style="margin-top:4px">
-      <div class="chart-sec-title">VALEUR DU PORTEFEUILLE</div>
-      <div class="chart-box">
-        <canvas id="c-valeur"></canvas>
-        <div class="chart-kpis">
-          <div class="chart-kpi"><div class="chart-kpi-lbl">DÉBUT</div><div class="chart-kpi-val">${fmt.eur(first.valeurTotale)}</div></div>
-          <div class="chart-kpi"><div class="chart-kpi-lbl">VARIATION</div><div class="chart-kpi-val ${cc(varV)}">${fmt.eur(varV, true)}</div></div>
-          <div class="chart-kpi"><div class="chart-kpi-lbl">PERF.</div><div class="chart-kpi-val ${cc(varPct)}">${fmt.pct(varPct, true)}</div></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="chart-sec" style="margin-top:12px">
       <div class="chart-sec-title">PNL EN COURS</div>
       <div class="chart-box">
         <canvas id="c-pnl"></canvas>
@@ -491,10 +477,19 @@ function renderEvolution() {
       </div>
     </div>
 
-    <div class="chart-sec" style="margin-top:12px;padding-bottom:0">
+    <div class="chart-sec" style="margin-top:12px">
+      <div class="chart-sec-title">VALEUR DU PORTEFEUILLE</div>
+      <div class="chart-box">
+        <canvas id="c-valeur"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-sec" style="margin-top:12px">
       <div class="chart-sec-title">TOTAL INVESTI</div>
       <div class="chart-box"><canvas id="c-investi"></canvas></div>
-    </div>`;
+    </div>
+
+    ${renderAnnualTable(S.data.log)}`;
 
   buildEvolutionCharts(log);
 }
@@ -521,14 +516,14 @@ function buildEvolutionCharts(data) {
     scales: {
       x: {
         grid: { color: 'rgba(255,255,255,.03)' },
-        ticks: { color: '#444', maxTicksLimit: 5, font: { size: 9, family: "'JetBrains Mono',monospace" } },
+        ticks: { color: '#444', maxTicksLimit: 5, font: { size: 9, family: "'DM Sans',sans-serif" } },
         border: { display: false }
       },
       y: {
         grid: { color: 'rgba(255,255,255,.04)' },
         ticks: {
           color: '#444',
-          font: { size: 9, family: "'JetBrains Mono',monospace" },
+          font: { size: 9, family: "'DM Sans',sans-serif" },
           callback: v => v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v
         },
         border: { display: false }
@@ -554,6 +549,80 @@ function buildEvolutionCharts(data) {
   S.charts.valeur  = mkLine('c-valeur',  'valeurTotale', '#ededed', .04);
   S.charts.pnl     = mkLine('c-pnl',     'pnl',          'auto',   .07);
   S.charts.investi = mkLine('c-investi', 'totalInvesti', '#3a3a3a', .05);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BILAN ANNUEL
+// ═══════════════════════════════════════════════════════════════
+function computeAnnualPerf(log) {
+  if (!log || log.length < 2) return [];
+
+  const parsed = log.map(e => ({ ...e, ts: new Date(e.date).getTime() }));
+
+  function nearest(targetTs) {
+    return parsed.reduce((b, e) =>
+      Math.abs(e.ts - targetTs) < Math.abs(b.ts - targetTs) ? e : b
+    );
+  }
+
+  const firstTs   = parsed[0].ts;
+  const lastTs    = parsed[parsed.length - 1].ts;
+  const firstYear = new Date(firstTs).getFullYear();
+  const lastYear  = new Date(lastTs).getFullYear();
+
+  const snaps = [];
+
+  // Point de départ : première entrée du log
+  snaps.push({ label: 'Départ', ts: firstTs, valeur: parsed[0].valeurTotale });
+
+  // 1er janvier de chaque année dans la plage de données
+  for (let y = firstYear + 1; y <= lastYear; y++) {
+    const jan1 = new Date(y, 0, 1).getTime();
+    if (jan1 > lastTs + 20 * 86400000) break;
+    const e = nearest(jan1);
+    if (Math.abs(e.ts - jan1) < 20 * 86400000) {
+      snaps.push({ label: `1er janv. ${y}`, ts: e.ts, valeur: e.valeurTotale });
+    }
+  }
+
+  // "Actuel" si +30 jours depuis le dernier snapshot
+  const lastSnap = snaps[snaps.length - 1];
+  if (lastTs - lastSnap.ts > 30 * 86400000) {
+    snaps.push({ label: 'Actuel', ts: lastTs, valeur: parsed[parsed.length - 1].valeurTotale });
+  }
+
+  // Calcul des deltas entre snapshots consécutifs
+  return snaps.map((s, i) => ({
+    ...s,
+    varEur: i > 0 ? s.valeur - snaps[i - 1].valeur : null,
+    varPct: i > 0 && snaps[i - 1].valeur > 0
+      ? (s.valeur - snaps[i - 1].valeur) / snaps[i - 1].valeur * 100
+      : null
+  }));
+}
+
+function renderAnnualTable(log) {
+  const rows = computeAnnualPerf(log);
+  if (rows.length < 2) return '';
+
+  return `
+    <div class="sec-hd" style="margin-top:4px">BILAN ANNUEL</div>
+    <div class="annual-wrap">
+      <div class="annual-hdr">
+        <span>PÉRIODE</span><span>VALEUR</span><span style="text-align:right">VARIATION</span>
+      </div>
+      ${rows.map((r, i) => `
+        <div class="annual-row${i === rows.length - 1 ? ' annual-current' : ''}">
+          <div class="annual-label">${r.label}</div>
+          <div class="annual-val">${fmt.eur(r.valeur)}</div>
+          <div class="annual-delta">
+            ${r.varEur !== null ? `
+              <div class="annual-delta-eur ${cc(r.varEur)}">${fmt.eur(r.varEur, true)}</div>
+              <div class="annual-delta-pct ${cc(r.varPct)}">${fmt.pct(r.varPct, true)}</div>
+            ` : '<span class="col-t2">—</span>'}
+          </div>
+        </div>`).join('')}
+    </div>`;
 }
 
 function filterLog(log, period) {

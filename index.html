@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#080808">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Portfolio">
+  <title>Portfolio</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ── Loading ── -->
+<div id="loading">
+  <div class="loader-wrap">
+    <div class="loader-ring"></div>
+    <div class="loader-label">PORTFOLIO</div>
+  </div>
+</div>
+
+<!-- ── App ── -->
+<div id="app" class="app-hidden">
+
+  <header id="header">
+    <span class="header-brand">PORTFOLIO</span>
+    <div class="header-right">
+      <span id="header-ts"></span>
+      <button id="refresh-btn" onclick="refreshData()" aria-label="Rafraîchir">
+        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="pages">
+    <div id="page-dashboard"  class="page active"></div>
+    <div id="page-positions"  class="page"></div>
+    <div id="page-evolution"  class="page"></div>
+    <div id="page-historique" class="page"></div>
+  </main>
+
+  <!-- Position detail slide-over -->
+  <div id="detail-overlay"></div>
+
+  <nav id="nav">
+    <button class="nav-item active" data-page="dashboard">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      <span>Dashboard</span>
+    </button>
+    <button class="nav-item" data-page="positions">
+      <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+      <span>Positions</span>
+    </button>
+    <button class="nav-item" data-page="evolution">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>Évolution</span>
+    </button>
+    <button class="nav-item" data-page="historique">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Historique</span>
+    </button>
+  </nav>
+
+</div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

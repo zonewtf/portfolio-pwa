@@ -456,7 +456,10 @@ function renderEvolution() {
     return;
   }
 
+  const first  = log[0];
   const last   = log[log.length - 1];
+  const varV   = last.valeurTotale - first.valeurTotale;
+  const varPct = first.valeurTotale > 0 ? varV / first.valeurTotale * 100 : 0;
   const maxV   = Math.max(...log.map(e => e.valeurTotale));
   const maxPnl = Math.max(...log.map(e => e.pnl));
 
@@ -481,6 +484,11 @@ function renderEvolution() {
       <div class="chart-sec-title">VALEUR DU PORTEFEUILLE</div>
       <div class="chart-box">
         <canvas id="c-valeur"></canvas>
+        <div class="chart-kpis">
+          <div class="chart-kpi"><div class="chart-kpi-lbl">VARIATION</div><div class="chart-kpi-val ${cc(varV)}">${fmt.eur(varV, true)}</div></div>
+          <div class="chart-kpi"><div class="chart-kpi-lbl">PERF. PÉRIODE</div><div class="chart-kpi-val ${cc(varPct)}">${fmt.pct(varPct, true)}</div></div>
+          <div class="chart-kpi"><div class="chart-kpi-lbl">ACTUELLE</div><div class="chart-kpi-val">${fmt.eur(last.valeurTotale)}</div></div>
+        </div>
       </div>
     </div>
 
